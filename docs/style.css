@@ -1,0 +1,23 @@
+/* Minimal Clean Documentation CSS */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 2rem auto;
+    max-width: 820px;
+    line-height: 1.65;
+}
+
+h1, h2, h3 {
+    font-family: 'Segoe UI', sans-serif;
+    margin-top: 2rem;
+}
+
+code, pre {
+    background: #f8f8f8;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+pre {
+    padding: 12px;
+}
