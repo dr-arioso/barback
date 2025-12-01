@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=D:\Bills_Stuff\GitHub\bar_back\venv
+set VIRTUAL_ENV=D:\Bills_Stuff\GitHub\barback\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
@@ -26,7 +26,6 @@ if not defined _OLD_VIRTUAL_PATH set _OLD_VIRTUAL_PATH=%PATH%
 
 set PATH=%VIRTUAL_ENV%\Scripts;%PATH%
 set VIRTUAL_ENV_PROMPT=(venv) 
-set PYTHONPATH = "D:\Bills_Stuff\GitHub\bar_back"
 
 :END
 if defined _OLD_CODEPAGE (

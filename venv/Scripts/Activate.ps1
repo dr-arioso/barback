@@ -57,8 +57,6 @@ Param(
     $Prompt
 )
 
-$env:PYTHONPATH = "D:\Bills_Stuff\GitHub\bar_back"
-
 <# Function declarations --------------------------------------------------- #>
 
 <#
