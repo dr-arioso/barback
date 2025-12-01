@@ -1,0 +1,35 @@
+# config/config.py
+import json
+from pathlib import Path
+import logging
+
+SETTINGS_FILE = Path(__file__).parent.parent / "data" / "settings.json"
+
+DEFAULT_CONFIG = {
+    "default_backend": "simple",
+    "api_keys": {"google": None, "openai": None},
+    "output_format": "csv",
+    "photo_folder": "data/input_photos"
+}
+
+
+def load_config() -> dict:
+    if SETTINGS_FILE.exists():
+        try:
+            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                merged = {**DEFAULT_CONFIG, **cfg}
+                merged["api_keys"] = {**DEFAULT_CONFIG["api_keys"], **cfg.get("api_keys", {})}
+                return merged
+        except Exception as e:
+            logging.warning("Failed to load config: %s", e)
+    return DEFAULT_CONFIG.copy()
+
+
+def save_config(cfg: dict):
+    try:
+        SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2)
+    except Exception as e:
+        logging.error("Failed to save config: %s", e)

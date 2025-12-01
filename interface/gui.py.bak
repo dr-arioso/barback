@@ -1,0 +1,93 @@
+# interface/gui.py
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
+from pathlib import Path
+from core.config import load_config, save_config
+from core.logger import get_logger
+from core.args_parser import parse_args
+from backends.simple_backend import SimpleBackend
+from backends.openai_vision import OpenAIVisionBackend
+from backends.google_vision import GoogleVisionBackend
+from core.pipeline import run_pipeline
+
+logger = get_logger(__name__)
+
+
+class InventoryGUI:
+    def __init__(self, args=None):
+        cfg = load_config()
+        if args is None:
+            args = parse_args()
+        # pre-populate with CLI args if provided or config values
+        self.cfg = cfg
+        self.args = args
+        self.photo_folder = Path(args.folder or cfg.get("photo_folder", "data/input_photos"))
+        self.backend_name = args.backend or cfg.get("default_backend", "simple")
+        self.api_key = args.api_key or cfg.get("api_keys", {}).get(self.backend_name, "")
+        self.output_format = args.output or cfg.get("output_format", "csv")
+        self.root = tk.Tk()
+        self.root.title("Bar Inventory Tool")
+        self.folder_var = tk.StringVar(value=str(self.photo_folder))
+        self.backend_var = tk.StringVar(value=self.backend_name)
+        self.api_var = tk.StringVar(value=self.api_key)
+        self.output_var = tk.StringVar(value=self.output_format)
+        self._build()
+
+    def _build(self):
+        frm = ttk.Frame(self.root, padding=10)
+        frm.grid()
+        ttk.Label(frm, text="Photo Folder:").grid(row=0, column=0, sticky="w")
+        ttk.Label(frm, textvariable=self.folder_var).grid(row=0, column=1, sticky="w")
+        ttk.Button(frm, text="Browse", command=self._browse).grid(row=0, column=2)
+        ttk.Label(frm, text="Backend:").grid(row=1, column=0, sticky="w")
+        ttk.Combobox(frm, textvariable=self.backend_var, values=["simple", "openai", "google"], state="readonly").grid(row=1, column=1)
+        ttk.Label(frm, text="API Key:").grid(row=2, column=0, sticky="w")
+        ttk.Entry(frm, textvariable=self.api_var, width=50).grid(row=2, column=1, columnspan=2, sticky="w")
+        ttk.Label(frm, text="Output Format:").grid(row=3, column=0, sticky="w")
+        ttk.Combobox(frm, textvariable=self.output_var, values=["csv", "json", "xlsx"], state="readonly").grid(row=3, column=1)
+        ttk.Button(frm, text="Start", command=self._start).grid(row=4, column=0, pady=10)
+        ttk.Button(frm, text="Cancel", command=self.root.destroy).grid(row=4, column=1)
+
+    def _browse(self):
+        folder = filedialog.askdirectory(initialdir=self.folder_var.get())
+        if folder:
+            self.folder_var.set(folder)
+
+    def _start(self):
+        cfg = self.cfg.copy()
+        cfg["folder"] = self.folder_var.get()
+        cfg["output"] = self.output_var.get()
+        cfg["default_backend"] = self.backend_var.get()
+        cfg["api_keys"] = cfg.get("api_keys", {})
+        cfg["api_keys"][self.backend_var.get()] = self.api_var.get()
+        save_config(cfg)
+        backend_name = self.backend_var.get()
+        api_key = self.api_var.get()
+        try:
+            if backend_name == "simple":
+                backend = SimpleBackend(api_key)
+            elif backend_name == "openai":
+                backend = OpenAIVisionBackend(api_key)
+            elif backend_name == "google":
+                backend = GoogleVisionBackend(api_key)
+            else:
+                backend = SimpleBackend(api_key)
+        except Exception as e:
+            messagebox.showerror("Backend error", str(e))
+            return
+        try:
+            run_pipeline(cfg, silent=False, backend_instance=backend)
+            messagebox.showinfo("Done", "Processing complete")
+        except Exception as e:
+            logger.exception("Pipeline failed: %s", e)
+            messagebox.showerror("Error", str(e))
+        finally:
+            self.root.destroy()
+
+    def run(self):
+        self.root.mainloop()
+
+
+def launch(args=None):
+    gui = InventoryGUI(args=args)
+    gui.run()

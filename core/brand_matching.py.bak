@@ -1,0 +1,76 @@
+# core/brand_matching.py
+import json
+from pathlib import Path
+from typing import Optional, List
+
+BRANDS_FILE = Path("data/brands.json")
+
+
+def normalize_brand(name: str) -> str:
+    if not name:
+        return ""
+    return " ".join(name.strip().title().split())
+
+
+def load_brands() -> List[str]:
+    if BRANDS_FILE.exists():
+        try:
+            with open(BRANDS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
+def save_brands(brand_list: List[str]):
+    BRANDS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(BRANDS_FILE, "w", encoding="utf-8") as f:
+        json.dump(sorted(set(brand_list)), f, indent=2)
+
+
+def fuzzy_match(input_text: str, brand_list: list, threshold: float = 80.0) -> Optional[str]:
+    try:
+        from rapidfuzz import process
+    except Exception:
+        return None
+    if not brand_list:
+        return None
+    match = process.extractOne(input_text, brand_list)
+    if match and match[1] >= threshold:
+        return match[0]
+    return None
+
+
+def resolve_brand(text: str, silent: bool = False) -> Optional[str]:
+    text = (text or "").strip()
+    if not text:
+        return None
+    brands = load_brands()
+    candidate = fuzzy_match(text, brands)
+    if candidate:
+        return candidate
+    if not silent:
+        print(f"Could not match brand from: '{text}'")
+        for i, b in enumerate(brands, start=1):
+            print(f"{i}: {b}")
+        print("0: Enter new brand")
+        try:
+            choice = int(input("Choice: "))
+        except Exception:
+            choice = 0
+        if choice == 0:
+            new_brand = input("Enter brand name: ").strip()
+            if new_brand:
+                nb = normalize_brand(new_brand)
+                brands.append(nb)
+                save_brands(brands)
+                return nb
+            return None
+        elif 1 <= choice <= len(brands):
+            return brands[choice - 1]
+        return None
+    else:
+        nb = normalize_brand(text)
+        brands.append(nb)
+        save_brands(brands)
+        return nb

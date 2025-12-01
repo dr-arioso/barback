@@ -1,0 +1,103 @@
+# core/pipeline.py
+from pathlib import Path
+from typing import Optional, Dict, Any, List
+from core.file_manager import setup_default_folders, get_photo_files, move_photo
+from core.brand_matching import resolve_brand
+from core.result_writer import write_results
+from core.errors import PipelineError
+from backends.base_backend import BackendInterface
+from PIL import Image
+import pytesseract
+try:
+    from pyzbar.pyzbar import decode as zbar_decode
+except Exception:
+    zbar_decode = None
+from core.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+def ocr_image_text(image_path: str) -> str:
+    try:
+        img = Image.open(image_path)
+        return pytesseract.image_to_string(img.convert("L"))
+    except Exception:
+        return ""
+
+
+def run_pipeline(cfg: Dict[str, Any], silent: bool = False, backend_instance: Optional[BackendInterface] = None):
+    folder = Path(cfg.get("folder", "data/input_photos"))
+    output_format = cfg.get("output", "csv")
+    folders = setup_default_folders()
+    photos = get_photo_files(folder)
+    if not photos:
+        raise PipelineError(f"No photos found in {folder}", code=2)
+
+    backend = backend_instance
+    if backend is None:
+        from backends.simple_backend import SimpleBackend
+        backend = SimpleBackend()
+
+    results: List[Dict[str, Any]] = []
+
+    for photo in photos:
+        data: Optional[Dict[str, Any]] = None
+        # 1) try barcode
+        if zbar_decode:
+            try:
+                img = Image.open(photo)
+                codes = zbar_decode(img)
+                if codes:
+                    code = codes[0].data.decode("utf-8")
+                    data = backend.identify_from_barcode(code)
+            except Exception as e:
+                logger.debug("barcode read failed for %s: %s", photo, e)
+
+        # 2) try backend image recognition
+        if data is None:
+            try:
+                data = backend.identify_from_image(str(photo))
+            except Exception as e:
+                logger.debug("backend identify_from_image failed for %s: %s", photo, e)
+                data = None
+
+        # 3) OCR fallback if necessary
+        if data is None or not data.get("brand"):
+            text = ocr_image_text(str(photo))
+            brand = resolve_brand(text, silent=silent)
+            volume_ml = None
+            # try basic parse
+            import re
+            m = re.search(r"(\d+)\s*mL", text, re.IGNORECASE)
+            if m:
+                volume_ml = int(m.group(1))
+            category = None
+            if text:
+                for cat in ['vodka', 'rum', 'tequila', 'liqueur', 'curacao', 'bitters', 'syrup', 'gin', 'whiskey']:
+                    if cat in text.lower():
+                        category = cat
+                        break
+            data = {"brand": brand, "volume_ml": volume_ml, "category": category, "dimensions_cm": None}
+
+        # 4) dimensions (ask backend.fetch_dimensions)
+        if not data.get("dimensions_cm"):
+            try:
+                dims = backend.fetch_dimensions(data.get("brand") or "")
+                data["dimensions_cm"] = dims
+            except Exception as e:
+                logger.debug("fetch_dimensions failed for %s: %s", data.get("brand"), e)
+                data["dimensions_cm"] = None
+
+        # 5) move photo
+        if data.get("brand"):
+            dest = folders["resolved"]
+        else:
+            dest = folders["unresolved"]
+        newpath = move_photo(photo, dest, brand=data.get("brand"), volume_ml=data.get("volume_ml"))
+        data["filename"] = newpath.name
+        results.append(data)
+        logger.info("Processed %s -> %s", photo.name, data.get("brand") or "UNRESOLVED")
+
+    # 6) write results
+    outpath = write_results(results, output_format)
+    logger.info("Wrote results to %s", outpath)

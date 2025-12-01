@@ -1,0 +1,50 @@
+# interface/cli.py
+import sys
+from ..core.args_parser import parse_args
+from ..core.config import load_config
+from ..core.logger import get_logger
+from ..core.pipeline import run_pipeline
+from ..backends.simple_backend import SimpleBackend
+from ..backends.openai_vision import OpenAIVisionBackend
+from ..backends.google_vision import GoogleVisionBackend
+
+logger = get_logger(__name__)
+
+
+def run(args=None):
+    if args is None:
+        args = parse_args()
+    cfg = load_config()
+    cfg["folder"] = args.folder or cfg.get("photo_folder", "data/input_photos")
+    cfg["output"] = args.output or cfg.get("output_format", "csv")
+    backend_name = args.backend or cfg.get("default_backend", "simple")
+    api_key = args.api_key or cfg.get("api_keys", {}).get(backend_name)
+
+    # instantiate backend
+    backend = None
+    try:
+        if backend_name == "simple":
+            backend = SimpleBackend(api_key)
+        elif backend_name == "openai":
+            backend = OpenAIVisionBackend(api_key)
+        elif backend_name == "google":
+            backend = GoogleVisionBackend(api_key)
+        else:
+            backend = SimpleBackend(api_key)
+    except Exception as e:
+        logger.error("Failed to create backend: %s", e)
+        sys.exit(3)
+
+    try:
+        run_pipeline(cfg, silent=args.silent, backend_instance=backend)
+    except Exception as e:
+        logger.exception("Pipeline failed: %s", e)
+        sys.exit(-1)
+
+
+def main():
+    run()
+
+
+if __name__ == "__main__":
+    main()
