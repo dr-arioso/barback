@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Type, Any
-import json
+import json, uuid
 
 class Datastore(ABC):
     _registry: Dict[str, Type['Datastore']] = {}
@@ -25,10 +25,17 @@ class Datastore(ABC):
 
 class JSONDatastore(Datastore, datastore_name="json"):
     def save(self, stash):
-        data = [item.model_dump() for item in stash.list()]
+        # Convert items to JSON-friendly dicts, excluding properties
+        data = []
+        for item in stash.list():
+            item_dict = item.model_dump(mode="json", exclude={'manufacturer'})
+            data.append(item_dict)
+
+        # Write to JSON file
         with open("stash.json", "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
         return "stash.json"
+
 
     def load(self):
         with open("stash.json", "r", encoding="utf-8") as f:

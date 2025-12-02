@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1676ae1e-dfef-47e2-890c-9fbbabcf9d76",
+    "canonical_name": "Bombay Sapphire Gin",
+    "aliases": [
+      "Bombay Gin"
+    ],
+    "categories": [
+      "Gin",
+      "Spirit"
+    ],
+    "photo": null,
+    "notes": null,
+    "brand": "Bombay",
+    "sku": null,
+    "upc": null,
+    "upc_photo": null,
+    "height_mm": 300.0,
+    "width_mm": 70.0,
+    "depth_mm": 70.0,
+    "weight_g": null,
+    "labeled_volume_ml": 750,
+    "distiller": null,
+    "bottler": null
+  },
+  {
+    "id": "056aa40b-7268-44c3-8159-9e916042671c",
+    "canonical_name": "Angostura Aromatic Bitters",
+    "aliases": [
+      "Angostura Bitters"
+    ],
+    "categories": [
+      "Bitters",
+      "Flavoring"
+    ],
+    "photo": null,
+    "notes": null,
+    "brand": "Angostura",
+    "sku": null,
+    "upc": null,
+    "upc_photo": null,
+    "height_mm": 150.0,
+    "width_mm": 40.0,
+    "depth_mm": 40.0,
+    "weight_g": null,
+    "labeled_volume_ml": 200,
+    "distiller": null,
+    "bottler": null
+  }
+]
