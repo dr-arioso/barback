@@ -1,0 +1,197 @@
+🧱 So what does StashKit need architecturally?
+
+A clean separation:
+
+StashKit (framework)
+│
+├── Model layer         (Item, Product, Bottle, etc.)
+├── Resolver layer      (ItemResolver, ProductResolver, StashSkills)
+└── Knowledge layer     (this is Option D)
+     ├── Data Stores    (FilesystemStore, SQLiteStore, APIStore…)
+     └── Ontologies     (hierarchical categories, controlled vocabularies)
+
+
+So file structure would be something like:
+StashKit
+ ├── models/
+ ├── stash/
+ ├── resolvers/
+ │    ├── base.py (pipeline)
+ │    ├── manual.py
+ │    └── skills/
+ │         ├── AIVisionSkill
+ │         ├── UPCSkill
+ │         ├── PublicDBSkill
+ │         ├── BrandSkill
+ │         ├── CategorySkill
+ │         └── VolumeSkill
+ ├── sources/
+ │    ├── stash_source.py   ← StashSource interface
+ │    ├── data_store.py     ← DataStore interface + fs/sql implementations
+ │    └── ontology.py       ← Ontology engine
+ └── utils/
+      └── normalization.py
+
+
+This is perfect because StashKit is:
+
+- Domain-agnostic
+- Capable of ingestion
+- Capable of normalization
+- But not opinionated
+
+So StashKit should:
+- NOT hardcode “spirits knowledge”
+- NOT assume “UPC exists”
+- NOT enforce “brand tables”
+- NOT assume “categories are flat”
+- NOT embed Barback-specific logic
+
+But it should support those things when the calling application wants them.
+
+And Barback becomes:
+- One opinionated application built on StashKit
+- Using StashKit knowledge primitives to compose its own brand/category ontology
+- Without polluting StashKit itself
+
+
+🏛️ Let’s outline three pillars of StashKit architecture (using Barback as an example of the separation between library and caller)
+
+Pillar 1 — Pluggable DataStores
+
+Every app should be allowed to configure where it loads/saves metadata:
+
+StashKitDataStore (abstract)
+ ├── FilesystemStore (JSON/CSV/YAML)
+ ├── SQLiteStore
+ ├── LocalMemoryStore
+ ├── RESTAPIStore
+ └── FirestoreStore / S3Store (future)
+
+
+You specify one or more DataStores:
+
+data_store = FilesystemStore("./metadata_cache")
+resolver = BottleResolver(data_store=data_store)
+
+
+Which gives you:
+- Local cache of scanned bottles
+- Local cache of user-added brands
+- Local cache of UPC lookups
+- Local cache of category mappings
+And you never ship huge databases — you cache only what you use.
+
+Failover:
+UPC lookup skill tries:
+- local store
+- secondary local store (e.g., an offline fork)
+- online public DB #1
+- online public DB #2
+- fallback to manual entry
+
+
+
+Pillar 2 — Controlled Vocabularies / Ontologies
+
+This is where your category/brand hierarchy belongs.
+
+It should not be Barback-only.
+Collectors, hobbyists, archivists will love it.
+
+The right form is a lightweight ontology:
+
+A simple model:
+
+class OntologyNode(BaseModel):
+    name: str
+    parents: List[str] = []
+    children: List[str] = []
+    aliases: List[str] = []
+
+
+And a manager:
+
+class Ontology:
+    def add_category(...)
+    def ancestors(...)
+    def descendants(...)
+    def is_subcategory(...)
+
+Examples from Barback:
+
+Triple Sec
+→ Orange Liqueur
+→ Liqueur
+→ Spirit
+→ Alcoholic Product
+→ Product (unless discussing generalized Triple Sec, then is an Item)
+→ Item
+
+Curacao
+→ Orange Liqueur
+→ (similar ancestor path)
+
+Both are mixers. Cointreau L'Unique is also considered an aperitif and digestif (both of which would be Alcoholic Products, but not in the same parent-child chain).
+
+Because:
+
+Cointreau is both a triple sec and orange liqueur
+
+Pierre Ferrand Dry Curacao is curacao AND orange liqueur
+DeKuyper Blue Curacao is an orange liqueur but not a true Curacao
+
+Let StashKit store:
+
+ontology.add("Curacao", parent="Orange Liqueur")
+ontology.add("Orange Curacao", parent="Curacao")
+ontology.add("Triple Sec", parent="Orange Liqueur")
+ontology.add("Flavored Brandy", parent="Liqueur")
+ontology.add("Blue Curacao", parent="Orange Liqueur")
+
+And calling code might use:
+
+resolver.normalize_category("curacao")
+
+
+To get a list like:
+
+["Curacao", "Orange Liqueur", "Liqueur", "Spirit"]
+
+
+StashKit should not enforce or supply any of these trees.
+But it can supply the framework for managing them.
+
+And calling code can enforce constraints like:
+- “For Tiki drinks, prefer Orange Curacao”
+- “Curacao implies Orange Liqueur”
+- “Never treat Blue Curacao as Curacao”
+
+Ontology and similar data would be retrieved by Resolver.Skills, using a specified StashSource (KnowledgeProvider)
+
+
+Pillar 3 — KnowledgeProvider abstraction We will call StashSource
+
+Resolvers should not load brand lists, categories, UPC ranges, etc.
+They should ask the KnowledgeProvider.
+
+class KnowledgeProvider:
+    def lookup_brand(self, name: str) -> Optional[BrandRecord]
+    def suggest_brand(self, text: str) -> Optional[str]
+    def get_category(self, name: str) -> OntologyNode
+    def save_product_metadata(self, product: Product)
+    ...
+
+
+StashSource can wrap:
+- a DataStore
+- an Ontology
+- a brand list
+- a cache
+
+This is where:
+- brand aliasing
+- category lookup
+- user-normalized names
+- merging heuristics
+belong.

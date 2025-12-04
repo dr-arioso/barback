@@ -1,0 +1,18 @@
+For convenience, barback/ (Barback root) currently contains /src tree, which contains the StashKit library. This will eventually be moved out into its own library.
+
+barback/
+  __init__.py
+  models.py
+  inventory/
+    __init__.py
+    bottle_stash.py
+  resolvers/
+    __init__.py
+    bottle_resolver.py
+    google_vision.py
+    openai_vision.py
+  core/
+    __init__.py
+    pipeline.py
+
+barback.py   # CLI entrypoint
