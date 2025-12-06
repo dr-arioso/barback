@@ -1,5 +1,5 @@
 
-# 🌟 Project Bootstrap Guide for Future ChatGPT Sessions
+# 🌟 Project Bootstrap Guide for ML Knowledge Graphs
 ## (StashKit • Booster Packs • BoozeDex • Barback)
 
 Welcome, future ChatGPT.  
