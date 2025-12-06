@@ -1,0 +1,130 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stashkit.io/schemas/boozedex.schema.json",
+  "title": "BoozeDex Canonical Taxonomy Schema",
+  "description": "Validation schema for the compiled BoozeDex JSON output produced by DexPack compilers.",
+  "type": "object",
+
+  "properties": {
+    "roots": {
+      "description": "Top-level root categories loaded from DexPacks.",
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+
+    "nodes": {
+      "description": "Dictionary of canonical category nodes, keyed by full path.",
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9_.]+$": {
+          "type": "object",
+          "required": ["path", "name", "children", "ancestors", "metadata"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Canonical dot-path, e.g. 'spirits.whiskey.american.bourbon'."
+            },
+            "name": {
+              "type": "string",
+              "description": "Final segment of the path."
+            },
+            "children": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Child category names."
+            },
+            "ancestors": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Hierarchical ancestry as names (not full paths)."
+            },
+            "metadata": {
+              "type": "object",
+              "description": "StashTags attached to this DexNode.",
+              "properties": {
+                "roles": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Roles (e.g., cocktail or beverage roles)."
+                },
+                "legal": {
+                  "type": "object",
+                  "description": "Legal classifications (TTB, EU, regional).",
+                  "additionalProperties": true
+                },
+                "production": {
+                  "type": "object",
+                  "description": "Production metadata (fermented, distilled).",
+                  "additionalProperties": true
+                },
+                "regional": {
+                  "type": "object",
+                  "description": "Geographic origin metadata.",
+                  "additionalProperties": true
+                },
+                "gs1": {
+                  "type": "object",
+                  "description": "GS1 classification bricks and attributes.",
+                  "additionalProperties": true
+                },
+                "flavor": {
+                  "type": "object",
+                  "description": "Flavor/aroma metadata.",
+                  "additionalProperties": true
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+
+    "aliases": {
+      "description": "Lookup table mapping normalized alias strings to canonical path(s).",
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9_\\- ]+$": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "roles": {
+      "description": "Role lookup tables: role_name → list of canonical paths.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+
+    "metadata_index": {
+      "description": "Flattened metadata: category_path → merged metadata object.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+
+    "version": {
+      "type": "object",
+      "description": "Version metadata for reproducibility.",
+      "properties": {
+        "version": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "hash": { "type": "string" }
+      },
+      "required": ["version", "timestamp", "hash"],
+      "additionalProperties": false
+    }
+  },
+
+  "required": ["roots", "nodes", "aliases", "roles", "metadata_index", "version"],
+  "additionalProperties": false
+}
