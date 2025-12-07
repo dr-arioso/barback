@@ -17,3 +17,6 @@ env/
 
 # macOS
 .DS_Store
+
+#Things *about* the project, but not contained in the project
+_meta_project/

@@ -15,7 +15,7 @@
 4. Tell the model something like:
 
    "This JSON is the canonical ontology and API map for the StashKit/Barback
-   architecture (MetaDex, get version from the .json file). Use `entities`, `relationships`, and `api.public_methods` as ground truth for architecture and API questions.
+   architecture (MetaDex get version from the .json file). Use `entities`, `relationships`, and `api.public_methods` as ground truth for architecture and API questions.
    Treat `api.internal_methods` as private."
 
 5. Then proceed directly to development questions; re-teaching the architecture
