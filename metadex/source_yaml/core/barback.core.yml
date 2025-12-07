@@ -1,0 +1,33 @@
+id: barback.core
+name: Barback
+type: system
+description: >
+  A pipeline orchestrator built on top of StashKit. Barback coordinates
+  input handling, pipeline execution, and output plugins, using StashKit
+  to provide domain-aware knowledge.
+
+traits:
+  - pipeline_orchestrator
+  - output_host
+  - stashkit_client
+
+fields:
+  responsibilities:
+    - Execute pipelines that rely on StashKit resolvers and skills
+    - Integrate output plugins for different targets
+    - Provide a higher-level interface for common workflows
+
+api:
+  public_methods:
+    - name: run_pipeline
+      params: ["pipeline", "input_data"]
+      returns: "PipelineResult"
+      description: "Run a Barback pipeline using StashKit for resolution steps."
+
+  properties:
+    - name: plugins
+      description: "Active output/integration plugins."
+
+  events:
+    - name: on_pipeline_step
+      description: "Fired before each step of a Barback pipeline."

@@ -1,0 +1,49 @@
+id: stashkit.stashdex
+name: StashDex
+type: concept
+description: >
+  The ontological engine and structured knowledge base that StashKit builds,
+  maintains, and uses. A StashDex stores entities, traits, rules, and
+  relationships in a form that enables inference and fast retrieval.
+
+traits:
+  - ontology
+  - semantic_model
+  - compiled_knowledge
+  - inference_host
+
+fields:
+  guarantees:
+    - Canonical entity representations
+    - Trait propagation across hierarchies
+    - Confidence and ambiguity modeling
+    - Schema evolution without breaking existing knowledge
+  examples:
+    - "BoozeDex: spirits and cocktails"
+    - "ProductDex: commercial products"
+    - "MetaDex: StashKit's own architecture"
+
+api:
+  public_methods:
+    - name: get
+      params: ["entity_id"]
+      returns: "StashDict"
+      description: "Retrieve a canonical entity from the Dex."
+    - name: query
+      params: ["criteria"]
+      returns: "List[StashDict]"
+      description: "Search the Dex using semantic criteria."
+    - name: update
+      params: ["entity"]
+      returns: "StashDict"
+      description: "Insert or update an entity."
+
+  properties:
+    - name: version
+      description: "Schema/version of the compiled Dex."
+    - name: traits
+      description: "Domain traits and classification rules."
+
+  events:
+    - name: on_trait_propagation
+      description: "Fired when traits propagate through hierarchies."

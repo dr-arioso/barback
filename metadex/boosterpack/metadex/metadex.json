@@ -1,0 +1,15 @@
+{
+  "entities": {},
+  "relationships": [],
+  "rules": [],
+  "derived": {
+    "reverse_relationships": {}
+  },
+  "version_info": {
+    "version": "1.2.0",
+    "timestamp": "2025-12-07T02:47:23Z",
+    "source_hash": "sha256:29986e3bcca027e758ae510cad36b1bef8e6e2aa3ef43c1bf5696dbeb873f566",
+    "compiler_version": "1.2",
+    "schema_version": "2025-01"
+  }
+}

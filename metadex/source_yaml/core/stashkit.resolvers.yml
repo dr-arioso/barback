@@ -1,0 +1,39 @@
+id: stashkit.resolvers
+name: Resolver Subsystem
+type: subsystem
+description: >
+  Resolves user requests by locating relevant signals, invoking skills, and
+  assembling coherent entities to store in the StashDex.
+
+traits:
+  - orchestrates_skills
+  - domain_aware
+  - input_interpreter
+
+fields:
+  responsibilities:
+    - Gather raw or partial inputs
+    - Invoke appropriate skills
+    - Merge conflicting signals
+    - Produce structured entities for the StashDex
+
+api:
+  public_methods:
+    - name: resolve
+      params: ["request"]
+      returns: "PartialEntity"
+      description: >
+        Interpret a request by gathering signals, applying skills, and building
+        a structured entity.
+
+  internal_methods:
+    - name: _apply_skills
+      description: "Construct the skill chain and apply it in order."
+
+  properties:
+    - name: domain
+      description: "The domain or entity type handled by this resolver."
+
+  events:
+    - name: on_ambiguous_match
+      description: "Fired when multiple entities match with similar confidence."

@@ -1,0 +1,50 @@
+id: stashkit.core
+name: StashKit
+type: system
+description: >
+  The primary framework for transforming messy real-world inputs into structured,
+  domain-aware knowledge stored inside one or more StashDexes.
+
+traits:
+  - knowledge_engine
+  - resolver_host
+  - skill_orchestrator
+  - ontology_builder
+
+fields:
+  responsibilities:
+    - Coordinate resolvers and skills
+    - Construct and update StashDexes
+    - Normalize heterogeneous input into structured entities
+  key_components:
+    - stashkit.resolvers
+    - stashkit.skills
+    - stashkit.stashdex
+    - stashkit.stashdict
+
+api:
+  public_methods:
+    - name: fetch
+      params: ["request", "resolver_id"]
+      returns: "StashDict | StructuredEntity"
+      description: >
+        High-level entry point to retrieve or build domain-aware entities using
+        resolvers and skills.
+    - name: register_skill
+      params: ["skill"]
+      returns: "None"
+      description: >
+        Add a Skill to the system-wide registry.
+
+  internal_methods:
+    - name: _dispatch_resolver
+      description: >
+        Internal routing logic to select and invoke the correct resolver.
+
+  properties:
+    - name: registry
+      description: "Holds registered skills and resolvers."
+
+  events:
+    - name: on_resolver_missing
+      description: "Fired when no resolver can interpret a request."

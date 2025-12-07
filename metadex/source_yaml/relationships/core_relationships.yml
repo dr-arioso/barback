@@ -1,0 +1,28 @@
+relationships:
+  - from: stashkit.core
+    type: uses
+    to: stashkit.resolvers
+
+  - from: stashkit.core
+    type: uses
+    to: stashkit.skills
+
+  - from: stashkit.core
+    type: builds
+    to: stashkit.stashdex
+
+  - from: stashkit.resolvers
+    type: updates
+    to: stashkit.stashdex
+
+  - from: stashkit.skills
+    type: enriches
+    to: stashkit.stashdex
+
+  - from: barback.core
+    type: depends_on
+    to: stashkit.core
+
+  - from: stashkit.boosterpacks
+    type: may_include
+    to: stashkit.stashdex

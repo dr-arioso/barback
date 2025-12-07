@@ -1,0 +1,16 @@
+[project]
+name = "metadex"
+version = "1.2.0"
+description = "Canonical ontology and compiler for the StashKit / Barback architecture."
+requires-python = ">=3.9"
+authors = [
+  { name = "MetaDex Maintainers", email = "dev@example.com" }
+]
+dependencies = ["pyyaml"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

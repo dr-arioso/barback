@@ -1,0 +1,29 @@
+id: stashkit.boosterpacks
+name: BoosterPacks
+type: concept
+description: >
+  Optional extension bundles that add skills, resolvers, helper utilities, and
+  compiled domain-specific StashDex datasets.
+
+traits:
+  - optional
+  - package_extension
+  - shareable
+
+fields:
+  examples:
+    - BoozeDex expansion packs
+    - World-of-Warcraft figurine Dex
+    - HerbDex for culinary herbs
+    - MetaDex-based StashKit Developer Pack
+
+api:
+  public_methods:
+    - name: install
+      params: ["pack_id"]
+      returns: "None"
+      description: "Install a BoosterPack and register its components."
+
+  properties:
+    - name: packs
+      description: "Installed BoosterPacks and their metadata."

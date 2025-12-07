@@ -1,0 +1,420 @@
+{
+  "derived": {
+    "reverse_relationships": {
+      "stashkit.core": [
+        {
+          "from": "barback.core",
+          "type": "depends_on"
+        }
+      ],
+      "stashkit.resolvers": [
+        {
+          "from": "stashkit.core",
+          "type": "uses"
+        }
+      ],
+      "stashkit.skills": [
+        {
+          "from": "stashkit.core",
+          "type": "uses"
+        }
+      ],
+      "stashkit.stashdex": [
+        {
+          "from": "stashkit.core",
+          "type": "builds"
+        },
+        {
+          "from": "stashkit.resolvers",
+          "type": "updates"
+        },
+        {
+          "from": "stashkit.skills",
+          "type": "enriches"
+        },
+        {
+          "from": "stashkit.boosterpacks",
+          "type": "may_include"
+        }
+      ]
+    }
+  },
+  "entities": {
+    "barback.core": {
+      "api": {
+        "events": [
+          {
+            "description": "Fired before each step of a Barback pipeline.",
+            "name": "on_pipeline_step"
+          }
+        ],
+        "properties": [
+          {
+            "description": "Active output/integration plugins.",
+            "name": "plugins"
+          }
+        ],
+        "public_methods": [
+          {
+            "description": "Run a Barback pipeline using StashKit for resolution steps.",
+            "name": "run_pipeline",
+            "params": [
+              "pipeline",
+              "input_data"
+            ],
+            "returns": "PipelineResult"
+          }
+        ]
+      },
+      "description": "A pipeline orchestrator built on top of StashKit. Barback coordinates input handling, pipeline execution, and output plugins, using StashKit to provide domain-aware knowledge.\n",
+      "fields": {
+        "responsibilities": [
+          "Execute pipelines that rely on StashKit resolvers and skills",
+          "Integrate output plugins for different targets",
+          "Provide a higher-level interface for common workflows"
+        ]
+      },
+      "id": "barback.core",
+      "name": "Barback",
+      "traits": [
+        "pipeline_orchestrator",
+        "output_host",
+        "stashkit_client"
+      ],
+      "type": "system"
+    },
+    "stashkit.boosterpacks": {
+      "api": {
+        "properties": [
+          {
+            "description": "Installed BoosterPacks and their metadata.",
+            "name": "packs"
+          }
+        ],
+        "public_methods": [
+          {
+            "description": "Install a BoosterPack and register its components.",
+            "name": "install",
+            "params": [
+              "pack_id"
+            ],
+            "returns": "None"
+          }
+        ]
+      },
+      "description": "Optional extension bundles that add skills, resolvers, helper utilities, and compiled domain-specific StashDex datasets.\n",
+      "fields": {
+        "examples": [
+          "BoozeDex expansion packs",
+          "World-of-Warcraft figurine Dex",
+          "HerbDex for culinary herbs",
+          "MetaDex-based StashKit Developer Pack"
+        ]
+      },
+      "id": "stashkit.boosterpacks",
+      "name": "BoosterPacks",
+      "traits": [
+        "optional",
+        "package_extension",
+        "shareable"
+      ],
+      "type": "concept"
+    },
+    "stashkit.core": {
+      "api": {
+        "events": [
+          {
+            "description": "Fired when no resolver can interpret a request.",
+            "name": "on_resolver_missing"
+          }
+        ],
+        "internal_methods": [
+          {
+            "description": "Internal routing logic to select and invoke the correct resolver.\n",
+            "name": "_dispatch_resolver"
+          }
+        ],
+        "properties": [
+          {
+            "description": "Holds registered skills and resolvers.",
+            "name": "registry"
+          }
+        ],
+        "public_methods": [
+          {
+            "description": "High-level entry point to retrieve or build domain-aware entities using resolvers and skills.\n",
+            "name": "fetch",
+            "params": [
+              "request",
+              "resolver_id"
+            ],
+            "returns": "StashDict | StructuredEntity"
+          },
+          {
+            "description": "Add a Skill to the system-wide registry.\n",
+            "name": "register_skill",
+            "params": [
+              "skill"
+            ],
+            "returns": "None"
+          }
+        ]
+      },
+      "description": "The primary framework for transforming messy real-world inputs into structured, domain-aware knowledge stored inside one or more StashDexes.\n",
+      "fields": {
+        "key_components": [
+          "stashkit.resolvers",
+          "stashkit.skills",
+          "stashkit.stashdex",
+          "stashkit.stashdict"
+        ],
+        "responsibilities": [
+          "Coordinate resolvers and skills",
+          "Construct and update StashDexes",
+          "Normalize heterogeneous input into structured entities"
+        ]
+      },
+      "id": "stashkit.core",
+      "name": "StashKit",
+      "traits": [
+        "knowledge_engine",
+        "resolver_host",
+        "skill_orchestrator",
+        "ontology_builder"
+      ],
+      "type": "system"
+    },
+    "stashkit.resolvers": {
+      "api": {
+        "events": [
+          {
+            "description": "Fired when multiple entities match with similar confidence.",
+            "name": "on_ambiguous_match"
+          }
+        ],
+        "internal_methods": [
+          {
+            "description": "Construct the skill chain and apply it in order.",
+            "name": "_apply_skills"
+          }
+        ],
+        "properties": [
+          {
+            "description": "The domain or entity type handled by this resolver.",
+            "name": "domain"
+          }
+        ],
+        "public_methods": [
+          {
+            "description": "Interpret a request by gathering signals, applying skills, and building a structured entity.\n",
+            "name": "resolve",
+            "params": [
+              "request"
+            ],
+            "returns": "PartialEntity"
+          }
+        ]
+      },
+      "description": "Resolves user requests by locating relevant signals, invoking skills, and assembling coherent entities to store in the StashDex.\n",
+      "fields": {
+        "responsibilities": [
+          "Gather raw or partial inputs",
+          "Invoke appropriate skills",
+          "Merge conflicting signals",
+          "Produce structured entities for the StashDex"
+        ]
+      },
+      "id": "stashkit.resolvers",
+      "name": "Resolver Subsystem",
+      "traits": [
+        "orchestrates_skills",
+        "domain_aware",
+        "input_interpreter",
+        "knowledge_engine"
+      ],
+      "type": "subsystem"
+    },
+    "stashkit.skills": {
+      "api": {
+        "internal_methods": [
+          {
+            "description": "Internal check for input structure or type.",
+            "name": "_validate"
+          }
+        ],
+        "properties": [
+          {
+            "description": "Unique feature identifier used for registration.",
+            "name": "skill_id"
+          }
+        ],
+        "public_methods": [
+          {
+            "description": "Apply the skill to the input data.",
+            "name": "apply",
+            "params": [
+              "input"
+            ],
+            "returns": "TransformedData"
+          }
+        ]
+      },
+      "description": "A collection of small, focused units that perform transformations, lookups, or interpretations on inputs.\n",
+      "fields": {
+        "examples": [
+          "Normalize brand names",
+          "Extract traits from free text",
+          "Query external APIs for enrichment",
+          "Read UPC barcodes",
+          "Use AI vision to identify an object",
+          "Ask the user for missing attributes",
+          "Identify a music track from an audio clip (future)"
+        ]
+      },
+      "id": "stashkit.skills",
+      "name": "Skill Subsystem",
+      "traits": [
+        "composable",
+        "atomic",
+        "reusable",
+        "knowledge_engine"
+      ],
+      "type": "subsystem"
+    },
+    "stashkit.stashdex": {
+      "api": {
+        "events": [
+          {
+            "description": "Fired when traits propagate through hierarchies.",
+            "name": "on_trait_propagation"
+          }
+        ],
+        "properties": [
+          {
+            "description": "Schema/version of the compiled Dex.",
+            "name": "version"
+          },
+          {
+            "description": "Domain traits and classification rules.",
+            "name": "traits"
+          }
+        ],
+        "public_methods": [
+          {
+            "description": "Retrieve a canonical entity from the Dex.",
+            "name": "get",
+            "params": [
+              "entity_id"
+            ],
+            "returns": "StashDict"
+          },
+          {
+            "description": "Search the Dex using semantic criteria.",
+            "name": "query",
+            "params": [
+              "criteria"
+            ],
+            "returns": "List[StashDict]"
+          },
+          {
+            "description": "Insert or update an entity.",
+            "name": "update",
+            "params": [
+              "entity"
+            ],
+            "returns": "StashDict"
+          }
+        ]
+      },
+      "description": "The ontological engine and structured knowledge base that StashKit builds, maintains, and uses. A StashDex stores entities, traits, rules, and relationships in a form that enables inference and fast retrieval.\n",
+      "fields": {
+        "examples": [
+          "BoozeDex: spirits and cocktails",
+          "ProductDex: commercial products",
+          "MetaDex: StashKit's own architecture"
+        ],
+        "guarantees": [
+          "Canonical entity representations",
+          "Trait propagation across hierarchies",
+          "Confidence and ambiguity modeling",
+          "Schema evolution without breaking existing knowledge"
+        ]
+      },
+      "id": "stashkit.stashdex",
+      "name": "StashDex",
+      "traits": [
+        "ontology",
+        "semantic_model",
+        "compiled_knowledge",
+        "inference_host"
+      ],
+      "type": "concept"
+    }
+  },
+  "relationships": [
+    {
+      "from": "stashkit.core",
+      "to": "stashkit.resolvers",
+      "type": "uses"
+    },
+    {
+      "from": "stashkit.core",
+      "to": "stashkit.skills",
+      "type": "uses"
+    },
+    {
+      "from": "stashkit.core",
+      "to": "stashkit.stashdex",
+      "type": "builds"
+    },
+    {
+      "from": "stashkit.resolvers",
+      "to": "stashkit.stashdex",
+      "type": "updates"
+    },
+    {
+      "from": "stashkit.skills",
+      "to": "stashkit.stashdex",
+      "type": "enriches"
+    },
+    {
+      "from": "barback.core",
+      "to": "stashkit.core",
+      "type": "depends_on"
+    },
+    {
+      "from": "stashkit.boosterpacks",
+      "to": "stashkit.stashdex",
+      "type": "may_include"
+    }
+  ],
+  "rules": [
+    {
+      "applies_to": "system",
+      "description": "Propagate selected traits from core systems to their subsystems.\n",
+      "id": "rule.propagate_system_traits_to_subsystems",
+      "logic": [
+        {
+          "propagate_traits": {
+            "to": [
+              "stashkit.resolvers",
+              "stashkit.skills"
+            ],
+            "traits": [
+              "knowledge_engine"
+            ]
+          },
+          "when_system_id": "stashkit.core"
+        }
+      ],
+      "rule_type": "trait_propagation"
+    }
+  ],
+  "version_info": {
+    "compiler_version": "1.2",
+    "schema_version": "2025-01",
+    "source_hash": "sha256:c52fbe46fe8e20f6c61ebe146a9f90bf96d07c7c6357405fd190c4a6dd8986b9",
+    "timestamp": "2025-12-07T02:49:36Z",
+    "version": "1.2.0"
+  }
+}

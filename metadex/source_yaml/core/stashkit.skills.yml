@@ -1,0 +1,36 @@
+id: stashkit.skills
+name: Skill Subsystem
+type: subsystem
+description: >
+  A collection of small, focused units that perform transformations, lookups,
+  or interpretations on inputs.
+
+traits:
+  - composable
+  - atomic
+  - reusable
+
+fields:
+  examples:
+    - Normalize brand names
+    - Extract traits from free text
+    - Query external APIs for enrichment
+    - Read UPC barcodes
+    - Use AI vision to identify an object
+    - Ask the user for missing attributes
+    - Identify a music track from an audio clip (future)
+
+api:
+  public_methods:
+    - name: apply
+      params: ["input"]
+      returns: "TransformedData"
+      description: "Apply the skill to the input data."
+
+  internal_methods:
+    - name: _validate
+      description: "Internal check for input structure or type."
+
+  properties:
+    - name: skill_id
+      description: "Unique feature identifier used for registration."

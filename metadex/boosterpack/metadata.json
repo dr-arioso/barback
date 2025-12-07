@@ -1,0 +1,15 @@
+{
+  "id": "stashkit.dev.boosterpack",
+  "name": "StashKit Developer BoosterPack",
+  "version": "1.2.0",
+  "description": "Orientation tools, skills, and MetaDex v1.2 for the StashKit/Barback architecture.",
+  "includes": {
+    "metadex": "metadex/metadex.json",
+    "skills": [
+      "boosterpack.skills.orientation_skill"
+    ],
+    "resolvers": [
+      "boosterpack.resolvers.architecture_resolver"
+    ]
+  }
+}

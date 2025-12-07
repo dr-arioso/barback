@@ -1,0 +1,23 @@
+# Using MetaDex v1.2 with GPT
+
+1. Ensure PyYAML is installed in your environment:
+
+   pip install pyyaml
+
+2. From the repo root, run the compiler to generate a fresh `metadex.json`:
+
+   python compiler/compiler.py \
+       --source source_yaml \
+       --output metadex/metadex.json
+
+3. Upload `metadex/metadex.json` at the start of a ChatGPT session.
+
+4. Tell the model something like:
+
+   "This JSON is the canonical ontology and API map for the StashKit/Barback
+   architecture (MetaDex v1.2). Use `entities`, `relationships`, and
+   `api.public_methods` as ground truth for architecture and API questions.
+   Treat `api.internal_methods` as private."
+
+5. Then proceed directly to development questions; re-teaching the architecture
+   and core APIs should not be necessary.
