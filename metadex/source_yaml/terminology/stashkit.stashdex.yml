@@ -1,0 +1,75 @@
+id: stashkit.stashdex
+name: StashDex
+type: concept
+description: >
+  A lexicon, ontology, and inference engine for a domain. StashDex provides canonical
+  entities, alias resolution, classification axes, and trait inference. It is not the
+  end-user storage layer; that role is handled by Stash.
+
+traits:
+  - ontology
+  - lexical_reference
+  - semantic_model
+  - inference_host
+
+fields:
+  responsibilities:
+    - Store canonical, domain-specific entities and traits.
+    - Handle aliases and synonyms for user-facing labels.
+    - Provide multi-axis classification (e.g. legal, functional, production-based).
+    - Infer additional traits from partial information and known rules.
+    - Evolve schema and knowledge without breaking previously stored stash entities.
+  typical_fields:
+    - version
+    - traits
+    - alias_maps
+    - rules
+    - classification_axes
+
+api:
+  public_methods:
+    - name: get
+      description: "Retrieve a canonical entity from the Dex by identifier."
+      params:
+        - entity_id
+      returns: "StashDict"
+
+    - name: query
+      description: "Search the Dex using semantic criteria such as traits, categories, or aliases."
+      params:
+        - criteria
+      returns: "List[StashDict]"
+
+    - name: update
+      description: "Insert or update a canonical entity in the Dex."
+      params:
+        - entity
+      returns: "StashDict"
+
+    - name: resolve_alias
+      description: "Resolve a name or alias into a canonical entity or label."
+      params:
+        - name_or_alias
+      returns: "AliasResolutionResult"
+
+    - name: infer
+      description: "Infer additional traits or classifications for a partial entity."
+      params:
+        - entity_fragment
+      returns: "InferredTraits"
+
+  internal_methods: []
+
+  properties:
+    - name: version
+      description: "Schema/version identifier for the Dex (e.g. BoozeDex.2025.04)."
+    - name: traits
+      description: "Domain traits and classification rules represented by this Dex."
+    - name: alias_maps
+      description: "Mappings from aliases and synonyms to canonical entities or labels."
+    - name: classification_axes
+      description: "Classification dimensions such as bartender_style, legal_category, production_method, use_case."
+
+  events:
+    - name: on_trait_propagation
+      description: "Fired when traits propagate through hierarchies or classification axes."

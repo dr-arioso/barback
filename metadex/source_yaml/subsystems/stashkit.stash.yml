@@ -1,0 +1,81 @@
+id: stashkit.stash
+name: Stash
+type: subsystem
+description: >
+  Persistent user collection of resolved entities. Each entity references a StashDex
+  via a short key in the stash-level dex_table. The Dex itself may evolve over time
+  without silently mutating stored entities.
+
+traits:
+  - persistent_storage
+  - user_collection
+  - dex_agnostic
+
+fields:
+  responsibilities:
+    - Persist resolved entities so they can be retrieved without re-running full resolution.
+    - Maintain a dex_table mapping short keys (e.g. D1) to fully-qualified Dex identifiers.
+    - Allow entities from multiple domains and Dexes to coexist in one collection.
+    - Support optional re-resolution or re-enrichment when Dexes or resolvers change.
+  typical_fields:
+    - stash_id
+    - metadata
+    - dex_table
+    - entities
+  dex_table_structure:
+    example:
+      D1: "BoozeDex.2025.04"
+      D2: "HerbDex.2026.01"
+
+api:
+  public_methods:
+    - name: add
+      description: "Add a resolved entity to the stash, associated with a Dex reference key."
+      params:
+        - entity
+        - dex_ref_key
+      returns: "EntityId"
+
+    - name: get
+      description: "Retrieve a stored entity by identifier."
+      params:
+        - entity_id
+      returns: "StoredEntity"
+
+    - name: list
+      description: "List entities matching basic criteria such as domain, tags, or Dex reference key."
+      params:
+        - criteria
+      returns: "List[StoredEntity]"
+
+    - name: update
+      description: "Update fields on a stored entity, preserving historical metadata as needed."
+      params:
+        - entity_id
+        - changes
+      returns: "StoredEntity"
+
+    - name: re_resolve
+      description: >
+        Optionally re-run a resolver for a stored entity using current Dex and skill configuration,
+        producing an updated entity while preserving or recording the original snapshot as desired.
+      params:
+        - entity_id
+        - options
+      returns: "StoredEntity | ResolutionDiff"
+
+  internal_methods:
+    - name: _ensure_dex_ref
+      description: "Ensure that a Dex identifier/version is present in dex_table and return its key."
+
+  properties:
+    - name: stash_id
+      description: "Identifier for this stash instance."
+    - name: metadata
+      description: "Optional metadata about the stash (e.g. owner, creation time, app context)."
+    - name: dex_table
+      description: "Mapping of short Dex keys (e.g. D1) to fully-qualified Dex identifiers."
+    - name: entities
+      description: "Collection of stored entities in this stash."
+
+  events: []

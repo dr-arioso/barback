@@ -1,0 +1,52 @@
+id: stashkit.boosterpacks
+name: BoosterPacks
+type: concept
+description: >
+  Optional extension bundles that add domain-specific StashDexes, entity schemas,
+  resolvers, skills, and helper utilities. BoosterPacks allow StashKit to be extended
+  to new domains without modifying the core framework.
+
+traits:
+  - optional
+  - domain_bundle
+  - package_extension
+  - shareable
+
+fields:
+  responsibilities:
+    - Package domain-specific Dexes, entities, resolvers, skills, and utilities.
+    - Provide installable extensions that register themselves with StashKit Core.
+    - Support sharing and reuse of domain knowledge and resolution logic.
+  possible_contents:
+    - StashDexes
+    - Entity schemas
+    - Domain-specific resolvers
+    - General-purpose or domain-specific skills
+    - Utility modules and configuration defaults
+
+api:
+  public_methods:
+    - name: install
+      description: "Install a BoosterPack by identifier and register its components."
+      params:
+        - pack_id
+      returns: "None"
+
+    - name: list
+      description: "List installed BoosterPacks and their key components."
+      params: []
+      returns: "List[BoosterPackMetadata]"
+
+    - name: get
+      description: "Retrieve metadata about a specific BoosterPack."
+      params:
+        - pack_id
+      returns: "BoosterPackMetadata"
+
+  internal_methods: []
+
+  properties:
+    - name: packs
+      description: "Installed BoosterPacks and their metadata."
+
+  events: []

@@ -1,0 +1,34 @@
+rules:
+  - id: propagate_core_traits
+    rule_type: trait_propagation
+    applies_to: system
+    description: "Propagate selected traits from core systems to subsystems."
+    logic:
+      - when_system_id: stashkit.core
+        propagate_traits:
+          traits:
+            - knowledge_engine
+          to:
+            - stashkit.resolvers
+            - stashkit.skills
+            - stashkit.stashdex
+
+  - id: resolver_supported_dex_consistency
+    rule_type: consistency
+    applies_to: subsystem
+    description: >
+      Ensure that stash entities using a resolver reference Dexes supported by that resolver.
+    logic:
+      - condition: "resolver.supported_dexes is not empty"
+        require: >
+          stash.entities[*].dex_ref_key resolves via stash.dex_table to a Dex whose id is in
+          resolver.supported_dexes
+
+  - id: stash_dex_table_references
+    rule_type: structural
+    applies_to: subsystem
+    description: >
+      Ensure that stash entities refer to Dexes through the stash dex_table using short keys.
+    logic:
+      - condition: "entity in stash.entities"
+        require: "entity.dex_ref_key in stash.dex_table"
