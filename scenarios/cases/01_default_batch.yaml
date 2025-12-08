@@ -1,0 +1,31 @@
+
+scenario_id: barback_cli_default_batch
+title: "Default Barback CLI batch resolution"
+version: 0.1
+domain: spirits
+
+initial_conditions:
+  boosterpack_installed: tinybar
+  default_resolver: BottleResolver
+  skills_enabled:
+    - OCRSkill
+    - ManualEntrySkill
+  skills_disabled:
+    - AIVisionSkill
+  input_file: "data/input_photos/*.jpg"
+
+processing_steps:
+  - step: "Load defaults"
+    resolver_action: "instantiate_default"
+
+  - step: "Iterate over photos"
+    resolver_action: "resolve_all"
+
+final_actions:
+  stash_add: "Barstash"
+  move_file_to: "data/resolved_photos/"
+  unresolved_to: "data/unresolved_photos/"
+
+summary:
+  resolved: true
+  unresolved_reason: null

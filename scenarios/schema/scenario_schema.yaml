@@ -1,0 +1,15 @@
+
+# Scenario Specification Format Schema (YAML)
+schema_version: 1.0
+description: >
+  Defines the structure for StashKit/Barback scenario files.
+
+required_fields:
+  - scenario_id
+  - title
+  - version
+  - domain
+  - initial_conditions
+  - processing_steps
+  - final_actions
+  - summary

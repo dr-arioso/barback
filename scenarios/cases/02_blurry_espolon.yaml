@@ -1,0 +1,60 @@
+
+scenario_id: barback_cli_blurry_espolon
+title: "Blurry Espolón bottle via Barback CLI with manual entry"
+version: 0.1
+domain: spirits
+
+initial_conditions:
+  boosterpack_installed: tinybar
+  default_resolver: BottleResolver
+  skills_enabled:
+    - OCRSkill
+    - ManualEntrySkill
+  skills_disabled:
+    - AIVisionSkill
+  input_file: "data/input_photos/IMG_0001.jpg"
+
+processing_steps:
+
+  - step: "OCRSkill generates partial text"
+    ocr_output:
+      text: "Esplon"
+      confidence: 0.3
+
+  - step: "Resolver queries BoozeDex"
+    candidates:
+      - Espolon Blanco
+      - Espolon Reposado
+      - Espolon Anejo
+      - Espolon Extra Anejo
+    resolver_action: "disambiguation_required"
+
+  - step: "UI prompt: single-select disambiguation"
+    prompt:
+      type: single_select
+      label: "Which of these bottles matches yours?"
+      options:
+        - Blanco
+        - Reposado
+        - Añejo
+        - Extra Añejo
+        - I don't know
+        - I'll type it in
+    user_response:
+      selected: "Añejo"
+
+  - step: "Dex canonicalization"
+    result:
+      entity:
+        brand: "Espolón"
+        name: "Añejo"
+        volume_ml: 750
+      confidence: 0.92
+
+final_actions:
+  stash_add: "Barstash"
+  move_file_to: "data/resolved_photos/IMG_0001.jpg"
+
+summary:
+  resolved: true
+  unresolved_reason: null
